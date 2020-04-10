@@ -34,22 +34,46 @@ variable "load_balance" {
   description = "This ether enables or disabels the load balancer building"
 }
 
-variable "probe_port" {
-  type        = string
-  default     = "80"
-  description = "If load_balancer is set to true it will need a port to probe in order for load balancer to work"
+variable "load_balanced_port_list" {
+  type        = list(number)
+  default     = []
+  description = "List of ports to be forwarded through load balancer to VMs"
+}
+
+variable "load_balancer_probe_port" {
+  type        = number
+  default     = 80
+  description = "Port used to health probe from load balancer. Defaults to 80"
 }
 
 variable "vm_size" {
   type        = string
   default     = "Standard_B2s"
-  description = "This desides what size your VMs will be"
+  description = "What size your VMs will be"
 }
 
 variable "instance_count" {
   type        = number
   default     = 1
   description = "This decides how many VM instance should be spun up"
+}
+
+variable "additional_data_disk_capacity_list" {
+  type        = list(number)
+  default     = []
+  description = "A list of additional disk capacities in GB to add to each instance"
+}
+
+variable "additional_data_disk_storage_account_type" {
+  type        = string
+  default     = "Standard_LRS"
+  description = "Storage account types for additional data disks. Possible values are: Standard_LRS, StandardSSD_LRS, Premium_LRS"
+}
+
+variable "os_disk_storage_account_type" {
+  type        = string
+  default     = "StandardSSD_LRS"
+  description = "Storage account types OS disks. Possible values are: Standard_LRS, StandardSSD_LRS, Premium_LRS"
 }
 
 variable "flavour" {
@@ -85,8 +109,9 @@ variable "linux_distro_list" {
 }
 
 variable "linux_distro" {
-  type    = string
-  default = "centos8"
+  type        = string
+  default     = "centos8"
+  description = "Variable to pick an OS flavour for Linux based VMSS possible values include: centos8, ubuntu1804"
 }
 
 variable "win_distro_list" {
@@ -122,6 +147,31 @@ variable "win_distro_list" {
 }
 
 variable "win_distro" {
-  type    = string
-  default = "wincore"
+  type        = string
+  default     = "wincore"
+  description = "Variable to pick an OS flavour for Windows based VMSS possible values include: winserver, wincore, winsql"
+}
+
+variable "ssh_key_type" {
+  type        = string
+  default     = "FilePath"
+  description = "Method for passing the SSH key into Linux VMSS. Generated will create a new SSH key pair in terraform. Possible values include: Generated, Filepath. Defaults to FilePath"
+}
+
+variable "admin_ssh_key_data" {
+  type        = string
+  default     = ""
+  description = "Public SSH key used for VMSS"
+}
+
+variable "admin_username" {
+  type        = string
+  default     = "batman"
+  description = "Username for administration access within VMSS"
+}
+
+variable "admin_password" {
+  type        = string
+  default     = ""
+  description = "Password for administration access within VMSS"
 }
