@@ -1,5 +1,7 @@
 trigger:
-- master
+  branches:
+    include:
+      - "*"
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -9,18 +11,10 @@ stages:
   jobs:
   - job: Validate
     steps:
-    - task: TerraformTaskV1@0
-      displayName: Terraform init
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: '$(Build.Repository.LocalPath)/'
-        commandOptions: '-no-color -backend=false'
+    - script: |
+        cd $(Build.Repository.LocalPath)
+        terraform init -no-color -backend=false
+      displayName: Run Terraform init
 
-    - task: TerraformTaskV1@0
-      displayName: Terraform validate
-      inputs:
-        provider: 'azurerm'
-        command: 'validate'
-        workingDirectory: '$(Build.Repository.LocalPath)/'
-        commandOptions: '-no-color'
+    - script: terraform validate -no-color
+      displayName: Run Terraform validate
