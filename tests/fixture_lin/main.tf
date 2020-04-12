@@ -38,5 +38,5 @@ output "ssh_priv_key" {
 }
 
 output "public_ip_address" {
-  value = module.vmss.pip.*.ip_address
+  value = module.vmss.pip[0].ip_address
 }
