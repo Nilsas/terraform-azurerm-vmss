@@ -27,7 +27,7 @@ stages:
       displayName: Update system and install Dep
     - script: |
         echo $GOPATH
-        goenv
+        go env
       displayName: Show environment variables
     - script: dep ensure
       displayName: Making sure all dependecies have been fulfiled
