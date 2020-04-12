@@ -36,5 +36,5 @@ stages:
         ls -al
         dep ensure
       displayName: Making sure all dependecies have been fulfiled
-    - script: go test -v ./tests/ -timeout 20m
+    - script: go test -v /home/vsts/go/src/tf-vmss/tests/ -timeout 20m
       displayName: Run Go Test
