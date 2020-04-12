@@ -11,37 +11,21 @@ import (
 	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/ssh"
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 )
 
 func TestTerraformSshExample(t *testing.T) {
 	t.Parallel()
 
-	fixtureFolder := "./fixture_lin"
+	terraformOptions := &terraform.Options{
+		TerraformDir: "./fixture_lin",
 
-	// Deploy the example
-	test_structure.RunTestStage(t, "setup", func() {
-		terraformOptions := configureTerraformOptions(t, fixtureFolder)
+		Vars: map[string]interface{}{},
+	}
 
-		// Save the options so later test stages can use them
-		test_structure.SaveTerraformOptions(t, fixtureFolder, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
+	defer terraform.Destroy(t, terraformOptions)
 
-		// This will init and apply the resource and fail the test if there are any errors
-		terraform.InitAndApply(t, terraformOptions)
-	})
-
-	// Make sure we can SSH to virtual machines directly from the public Internet
-	test_structure.RunTestStage(t, "validate", func() {
-		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
-
-		testSSHToPublicHost(t, terraformOptions, "public_ip_address")
-	})
-
-	// At the end of the test, clean up any resources that were created
-	test_structure.RunTestStage(t, "teardown", func() {
-		terraformOptions := test_structure.LoadTerraformOptions(t, fixtureFolder)
-		terraform.Destroy(t, terraformOptions)
-	})
+	testSSHToPublicHost(t, terraformOptions, "public_ip_address")
 }
 
 func configureTerraformOptions(t *testing.T, exampleFolder string) *terraform.Options {
