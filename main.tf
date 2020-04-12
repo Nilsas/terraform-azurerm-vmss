@@ -1,6 +1,7 @@
-provider "azurerm" {
-  version = ">= 2.0"
-  features {}
+terraform {
+  required_providers {
+    azurerm = ">= 2.0.0"
+  }
 }
 
 locals {
