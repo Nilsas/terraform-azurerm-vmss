@@ -2,7 +2,6 @@ package test
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -40,12 +39,12 @@ func configureTerraformOptions(t *testing.T, exampleFolder string) *terraform.Op
 	return terraformOptions
 }
 
-func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, address string, priv_key string) {
+func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, address string, privKey string) {
 	// Run `terraform output` to get the value of an output variable
 	publicIP := terraform.Output(t, terraformOptions, address)
 
 	// Read private key from given file
-	buffer := terraform.Output(t, terraformOptions, priv_key)
+	buffer := terraform.Output(t, terraformOptions, privKey)
 
 	keyPair := ssh.KeyPair{PrivateKey: string(buffer)}
 
@@ -53,7 +52,7 @@ func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, addr
 	publicHost := ssh.Host{
 		Hostname:    publicIP,
 		SshKeyPair:  &keyPair,
-		SshUserName: os.Args[len(os.Args)-2],
+		SshUserName: "batman",
 	}
 
 	// It can take a minute or so for the virtual machine to boot up, so retry a few times
