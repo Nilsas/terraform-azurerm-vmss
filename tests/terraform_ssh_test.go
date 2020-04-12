@@ -2,7 +2,6 @@ package test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -25,7 +24,7 @@ func TestTerraformSshExample(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 	defer terraform.Destroy(t, terraformOptions)
 
-	testSSHToPublicHost(t, terraformOptions, "public_ip_address")
+	testSSHToPublicHost(t, terraformOptions, "public_ip_address", "ssh_priv_key")
 }
 
 func configureTerraformOptions(t *testing.T, exampleFolder string) *terraform.Options {
@@ -41,15 +40,13 @@ func configureTerraformOptions(t *testing.T, exampleFolder string) *terraform.Op
 	return terraformOptions
 }
 
-func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, address string) {
+func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, address string, priv_key string) {
 	// Run `terraform output` to get the value of an output variable
 	publicIP := terraform.Output(t, terraformOptions, address)
 
 	// Read private key from given file
-	buffer, err := ioutil.ReadFile(os.Args[len(os.Args)-1])
-	if err != nil {
-		t.Fatal(err)
-	}
+	buffer := terraform.Output(t, terraformOptions, priv_key)
+
 	keyPair := ssh.KeyPair{PrivateKey: string(buffer)}
 
 	// We're going to try to SSH to the virtual machine, using our local key pair and specific username
