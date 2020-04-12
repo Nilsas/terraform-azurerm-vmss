@@ -9,7 +9,7 @@ stages:
   jobs:
   - job: Validate
     steps:
-    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+    - task: TerraformTaskV1@0
       displayName: Terraform init
       inputs:
         provider: 'azurerm'
@@ -17,7 +17,7 @@ stages:
         workingDirectory: '$(Build.Repository.LocalPath)/'
         commandOptions: '-no-color -backend=false'
 
-    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+    - task: TerraformTaskV1@0
       displayName: Terraform validate
       inputs:
         provider: 'azurerm'
