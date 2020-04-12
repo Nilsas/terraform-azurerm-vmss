@@ -41,6 +41,11 @@ stages:
         azureSubscription: 'Visual Studio Professional'
         scriptType: 'pscore'
         scriptLocation: 'inlineScript'
+        addSpnToEnvironment: true
         inlineScript: |
+          export ARM_CLIENT_ID="$env:servicePrincipalId"
+          export ARM_CLIENT_SECRET="$env:servicePrincipalKey"
+          export ARM_TENANT_ID="$env:tenantId"
+          export ARM_SUBSCRIPTION_ID="$(az account show --query 'id' -o tsv)"
           go test -v /home/vsts/go/src/tf-vmss/tests/ -timeout 20m
       displayName: Run Go Test
