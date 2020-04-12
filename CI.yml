@@ -36,5 +36,11 @@ stages:
         ls -al
         dep ensure
       displayName: Making sure all dependecies have been fulfiled
-    - script: go test -v /home/vsts/go/src/tf-vmss/tests/ -timeout 20m
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'Visual Studio Professional'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          go test -v /home/vsts/go/src/tf-vmss/tests/ -timeout 20m
       displayName: Run Go Test
