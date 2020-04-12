@@ -1,5 +1,7 @@
 # terraform-azurerm-vmss
 
+[![Build Status](https://dev.azure.com/NilsasFirantas/tf-playground/_apis/build/status/Nilsas.terraform-azurerm-vmss?branchName=master)](https://dev.azure.com/NilsasFirantas/tf-playground/_build/latest?definitionId=8&branchName=master)
+
 This module builds Windows or Linux based scale set, with it's own Vnet and Subnet. It can create Load balancing but it is optional.
 
 Prerequisites and tested on:
