@@ -30,9 +30,9 @@ stages:
         go env
       displayName: Show environment variables
     - script: |
-        mkdir -p /home/vsts/go/src
-        mv $(Build.Repository.LocalPath)/* /home/vsts/go/src
-        cd /home/vsts/go/src
+        mkdir -p /home/vsts/go/src/tf-vmss
+        mv $(Build.Repository.LocalPath)/* /home/vsts/go/src/tf-vmss
+        cd /home/vsts/go/src/tfvmss
         ls -al
         dep ensure
       displayName: Making sure all dependecies have been fulfiled
