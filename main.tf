@@ -70,6 +70,18 @@ resource "azurerm_lb_backend_address_pool" "pool" {
   resource_group_name = data.azurerm_resource_group.rg.name
 }
 
+resource "azurerm_lb_nat_pool" "natpool" {
+  count                          = var.load_balance ? 1 : 0
+  resource_group_name            = data.azurerm_resource_group.rg.name
+  name                           = "ssh"
+  loadbalancer_id                = azurerm_lb.lb[count.index].id
+  protocol                       = "Tcp"
+  frontend_port_start            = 50000
+  frontend_port_end              = 50119
+  backend_port                   = 22
+  frontend_ip_configuration_name = azurerm_lb.lb[0].frontend_ip_configuration.0.name
+}
+
 resource "azurerm_lb_probe" "probe" {
   count               = var.load_balance ? 1 : 0
   name                = format("%s-lb-probe-port-%d", var.prefix, var.load_balancer_probe_port)
@@ -137,7 +149,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
       primary   = true
       subnet_id = azurerm_subnet.subnet.id
 
-      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.pool[0].id]
+      load_balancer_backend_address_pool_ids = var.load_balance ? [azurerm_lb_backend_address_pool.pool[0].id] : null
+      load_balancer_inbound_nat_rules_ids    = var.load_balance ? [azurerm_lb_nat_pool.natpool[0].id] : null
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
