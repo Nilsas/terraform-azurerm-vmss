@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -26,19 +27,6 @@ func TestTerraformSshExample(t *testing.T) {
 	testSSHToPublicHost(t, terraformOptions, "ssh_conn_info", "ssh_priv_key")
 }
 
-func configureTerraformOptions(t *testing.T, exampleFolder string) *terraform.Options {
-
-	terraformOptions := &terraform.Options{
-		// The path to where our Terraform code is located
-		TerraformDir: exampleFolder,
-
-		// Variables to pass to our Terraform code using -var options
-		Vars: map[string]interface{}{},
-	}
-
-	return terraformOptions
-}
-
 func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, sshInfo string, privKey string) {
 	// It can take a minute or so for the virtual machine to boot up, so retry a few times
 	maxRetries := 15
@@ -49,23 +37,34 @@ func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, sshI
 
 	keyPair := ssh.KeyPair{PrivateKey: string(buffer)}
 
-	// Read public IP address and port from terarform output
-	sshHosts := terraform.Output(t, terraformOptions, sshInfo)
+	// Read public IP address and port from terraform output
+	hostsResult := terraform.Output(t, terraformOptions, sshInfo)
 
-	for _, value := range sshHosts {
-		// Split Host IP and Port to give us a list
-		host := strings.Split(value, ":")
+	// Clean up hosts result
+	hostsResult = strings.ReplaceAll(hostsResult, "\n", "")
+	hostsResult = strings.ReplaceAll(hostsResult, " ", "")
+	hostsResult = strings.ReplaceAll(hostsResult, `""`, `","`)
+	hostsResult = strings.ReplaceAll(hostsResult, "{", "")
+	hostsResult = strings.ReplaceAll(hostsResult, "}", "")
+	hostsResult = strings.ReplaceAll(hostsResult, `"`, "")
 
-		// Agreggate SSH information to pass into execution
+	// Split up cleaned result
+	sshHosts := strings.Split(hostsResult, ",")
+
+	for _, instance := range sshHosts {
+		instance := strings.Split(instance, "=")
+		address := strings.Split(instance[1], ":")
+		port, _ := strconv.Atoi(address[1])
+
 		publicHost := ssh.Host{
-			Hostname:    host[0],
+			Hostname:    address[0],
 			SshKeyPair:  &keyPair,
 			SshUserName: "batman",
-			CustomPort:  host[1],
+			CustomPort:  port,
 		}
 
 		// Print where are we connecting
-		description := fmt.Sprintf("SSH to public host %s on port %d", host[0], host[1])
+		description := fmt.Sprintf("SSH to public host %s on port %d", publicHost.Hostname, publicHost.CustomPort)
 
 		// Run a simple echo command on the server
 		expectedText := "Hello, World"

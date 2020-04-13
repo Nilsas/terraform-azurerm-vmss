@@ -38,9 +38,6 @@ output "ssh_priv_key" {
   sensitive = true
 }
 
-output "public_ip_address" {
-  value = module.vmss.pip[0].ip_address
-}
 data "external" "list_vmss_ips" {
   program = ["pwsh", "-Command", "az", "vmss", "list-instance-connection-info",
     "-g", "terraform-test-rg", "--name", "nil-vmss",
