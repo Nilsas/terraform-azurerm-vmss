@@ -23,19 +23,15 @@ data "azurerm_resource_group" "rg" {
   name = var.resource_group_name
 }
 
-resource "azurerm_virtual_network" "vnet" {
-  address_space       = [var.address_space]
-  location            = data.azurerm_resource_group.rg.location
-  name                = format("%s-vnet", var.prefix)
+data "azurerm_virtual_network" "vnet" {
+  name                = var.virtual_network_name
   resource_group_name = data.azurerm_resource_group.rg.name
-  tags                = var.tags
 }
 
-resource "azurerm_subnet" "subnet" {
-  address_prefix       = var.address_space
-  name                 = format("%s-subnet", var.prefix)
+data "azurerm_subnet" "subnet" {
+  name                 = var.subnet_name
+  virtual_network_name = data.azurerm_virtual_network.vnet.name
   resource_group_name  = data.azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
 }
 
 resource "azurerm_public_ip" "pip" {
@@ -147,14 +143,15 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
     ip_configuration {
       name      = format("%s-ipconfig", var.prefix)
       primary   = true
-      subnet_id = azurerm_subnet.subnet.id
+      subnet_id = data.azurerm_subnet.subnet.id
 
       load_balancer_backend_address_pool_ids = var.load_balance ? [azurerm_lb_backend_address_pool.pool[0].id] : null
       load_balancer_inbound_nat_rules_ids    = var.load_balance ? [azurerm_lb_nat_pool.natpool[0].id] : null
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
-  depends_on = [azurerm_lb_rule.lb_rule]
+  depends_on = [
+    azurerm_lb_rule.lb_rule]
 }
 
 resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
@@ -198,11 +195,13 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
     ip_configuration {
       name      = format("%s-ipconfig", var.prefix)
       primary   = true
-      subnet_id = azurerm_subnet.subnet.id
+      subnet_id = data.azurerm_subnet.subnet.id
 
-      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.pool[0].id]
+      load_balancer_backend_address_pool_ids = var.load_balance ? [azurerm_lb_backend_address_pool.pool[0].id] : null
+      load_balancer_inbound_nat_rules_ids    = var.load_balance ? [azurerm_lb_nat_pool.natpool[0].id] : null
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
-  depends_on = [azurerm_lb_rule.lb_rule]
+  depends_on = [
+    azurerm_lb_rule.lb_rule]
 }
