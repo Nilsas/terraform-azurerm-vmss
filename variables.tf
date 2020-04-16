@@ -10,10 +10,16 @@ variable "resource_group_name" {
   description = "This will tell us to which resource group we need to deploy the resources of this module"
 }
 
-variable "address_space" {
+variable "virtual_network_name" {
   type        = string
-  default     = "10.10.0.0/16"
-  description = "This is to create a Vnet and Subnet for our Scale Set"
+  default     = "my-virtual-network"
+  description = "This will get the Vnet provided to the module to use for further deployment of resources"
+}
+
+variable "subnet_name" {
+  type        = string
+  default     = ""
+  description = "This determines the name of subnet for our Scale Set."
 }
 
 variable "prefix" {
