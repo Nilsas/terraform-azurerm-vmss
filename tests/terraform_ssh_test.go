@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -50,41 +51,46 @@ func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, sshI
 
 	// Split up cleaned result
 	sshHosts := strings.Split(hostsResult, ",")
-
+	wg := &sync.WaitGroup{}
 	for _, instance := range sshHosts {
-		instance := strings.Split(instance, "=")
-		address := strings.Split(instance[1], ":")
-		port, _ := strconv.Atoi(address[1])
+		wg.Add(1)
+		go func(instance string) {
+			defer wg.Done()
+			instanceParts := strings.Split(instance, "=")
+			address := strings.Split(instanceParts[1], ":")
+			port, _ := strconv.Atoi(address[1])
 
-		publicHost := ssh.Host{
-			Hostname:    address[0],
-			SshKeyPair:  &keyPair,
-			SshUserName: "batman",
-			CustomPort:  port,
-		}
-
-		// Print where are we connecting
-		description := fmt.Sprintf("SSH to public host %s on port %d", publicHost.Hostname, publicHost.CustomPort)
-
-		// Run a simple echo command on the server
-		expectedText := "Hello, World"
-		command := fmt.Sprintf("echo -n '%s'", expectedText)
-
-		// Verify that we can SSH to the virtual machine and run commands
-		retry.DoWithRetry(t, description, maxRetries, timeBetweenRetries, func() (string, error) {
-			// Run the command and get the output
-			actualText, err := ssh.CheckSshCommandE(t, publicHost, command)
-			if err != nil {
-				return "", err
+			publicHost := ssh.Host{
+				Hostname:    address[0],
+				SshKeyPair:  &keyPair,
+				SshUserName: "batman",
+				CustomPort:  port,
 			}
 
-			// Check whether the output is correct
-			if strings.TrimSpace(actualText) != expectedText {
-				return "", fmt.Errorf("Expected SSH command to return '%s' but got '%s'", expectedText, actualText)
-			}
-			fmt.Println(actualText)
+			// Print where are we connecting
+			description := fmt.Sprintf("SSH to public host %s on port %d", publicHost.Hostname, publicHost.CustomPort)
 
-			return "", nil
-		})
+			// Run a simple echo command on the server
+			expectedText := "Hello, World"
+			command := fmt.Sprintf("echo -n '%s'", expectedText)
+
+			// Verify that we can SSH to the virtual machine and run commands
+			retry.DoWithRetry(t, description, maxRetries, timeBetweenRetries, func() (string, error) {
+				// Run the command and get the output
+				actualText, err := ssh.CheckSshCommandE(t, publicHost, command)
+				if err != nil {
+					return "", err
+				}
+
+				// Check whether the output is correct
+				if strings.TrimSpace(actualText) != expectedText {
+					return "", fmt.Errorf("Expected SSH command to return '%s' but got '%s'", expectedText, actualText)
+				}
+				fmt.Println(actualText)
+
+				return "", nil
+			})
+		}(instance)
 	}
+	wg.Wait()
 }
