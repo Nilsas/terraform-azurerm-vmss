@@ -9,21 +9,22 @@ provider "azurerm" {
 }
 
 locals {
-  prefix = lower(random_string.str.id)
+  prefix = lower(random_id.id.id)
 }
 
 data "http" "ip" {
   url = "https://api.ipify.org/"
 }
 
-resource "random_string" "str" {
-  length = 4
+resource "random_id" "id" {
+  length = 5
   special = false
+  prefix = "tf"
 }
 
 resource "azurerm_resource_group" "rg" {
   location = "westeurope"
-  name     = format("%s-rg", random_string.str.id)
+  name     = format("%s-rg", local.prefix)
   tags     = {
     EnvironmentType = "Development"
   }
