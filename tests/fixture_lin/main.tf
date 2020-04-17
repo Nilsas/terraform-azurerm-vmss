@@ -9,7 +9,7 @@ provider "azurerm" {
 }
 
 locals {
-  prefix = lower(random_id.id.id)
+  prefix = format("tf%s", lower(random_id.id.id))
 }
 
 data "http" "ip" {
@@ -18,7 +18,6 @@ data "http" "ip" {
 
 resource "random_id" "id" {
   byte_length = 5
-  prefix = "tf"
 }
 
 resource "azurerm_resource_group" "rg" {
