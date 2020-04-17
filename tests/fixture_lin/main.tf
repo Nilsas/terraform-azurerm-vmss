@@ -9,16 +9,21 @@ provider "azurerm" {
 }
 
 locals {
-  prefix = "nil"
+  prefix = random_string.str.id
 }
 
 data "http" "ip" {
   url = "https://api.ipify.org/"
 }
 
+resource "random_string" "str" {
+  length = 4
+  special = false
+}
+
 resource "azurerm_resource_group" "rg" {
   location = "westeurope"
-  name     = "terraform-test-rg"
+  name     = format("%s-rg", random_string.str.id)
   tags     = {
     EnvironmentType = "Development"
   }
@@ -48,8 +53,7 @@ module "vmss" {
   flavour                 = "lin"
   instance_count          = 2
   load_balance            = true
-  load_balanced_port_list = [
-    80]
+  load_balanced_port_list = [80]
   ssh_key_type            = "Generated"
   admin_username          = "batman"
   tags                    = azurerm_resource_group.rg.tags
