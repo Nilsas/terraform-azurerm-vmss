@@ -101,9 +101,9 @@ data "external" "list_vmss_ips" {
     "vmss",
     "list-instance-connection-info",
     "-g",
-    "terraform-test-rg",
+    "${azurerm_resource_group.rg.name}}",
     "--name",
-    "nil-vmss",
+    "${module.vmss.vmss.name}}",
   ]
   depends_on = [module.vmss.vmss]
 }
