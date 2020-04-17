@@ -150,8 +150,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
-  depends_on = [
-    azurerm_lb_rule.lb_rule]
+  depends_on = [azurerm_lb_rule.lb_rule]
 }
 
 resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
@@ -202,6 +201,5 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
-  depends_on = [
-    azurerm_lb_rule.lb_rule]
+  depends_on = [azurerm_lb_rule.lb_rule]
 }

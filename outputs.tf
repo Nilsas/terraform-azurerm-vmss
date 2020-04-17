@@ -10,8 +10,24 @@ output "pip" {
   value = azurerm_public_ip.pip
 }
 
+output "lb" {
+  value = azurerm_lb.lb[*]
+}
+
+output "lbbepool" {
+  value = azurerm_lb_backend_address_pool.pool[*]
+}
+
 output "lbnatpool" {
-  value = azurerm_lb_nat_pool.natpool
+  value = azurerm_lb_nat_pool.natpool[*]
+}
+
+output "lbprobe" {
+  value = azurerm_lb_probe.probe[*]
+}
+
+output "lbrule" {
+  value = azurerm_lb_rule.lb_rule[*]
 }
 
 output "vmss" {
