@@ -85,25 +85,25 @@ func testSSHToPublicHost(t *testing.T, terraformOptions *terraform.Options, sshI
 }
 
 func getInstanceConnectionInfo(t *testing.T, terraformOptions *terraform.Options, outputName string) []string {
-	// Read public IP address and port from terraform output
-	hostsResult := terraform.Output(t, terraformOptions, outputName)
-
-	// Clean up hosts result
-	hostsResult = strings.ReplaceAll(hostsResult, "\n", "")
-	hostsResult = strings.ReplaceAll(hostsResult, " ", "")
-	hostsResult = strings.ReplaceAll(hostsResult, `""`, `","`)
-	hostsResult = strings.ReplaceAll(hostsResult, "{", "")
-	hostsResult = strings.ReplaceAll(hostsResult, "}", "")
-	hostsResult = strings.ReplaceAll(hostsResult, `"`, "")
-
-	// Split up cleaned result
-	sshHosts := strings.Split(hostsResult, ",")
-
 	// Test case is carried with 2 instances
 	// If there are more than 2 instance in the list, wait
 	// Azure over-provisions Instances to maximize success rate
 	// retry for 5 minutes
 	for i := 0; i < 30 ; i++ {
+		// Read public IP address and port from terraform output
+		hostsResult := terraform.Output(t, terraformOptions, outputName)
+
+		// Clean up hosts result
+		hostsResult = strings.ReplaceAll(hostsResult, "\n", "")
+		hostsResult = strings.ReplaceAll(hostsResult, " ", "")
+		hostsResult = strings.ReplaceAll(hostsResult, `""`, `","`)
+		hostsResult = strings.ReplaceAll(hostsResult, "{", "")
+		hostsResult = strings.ReplaceAll(hostsResult, "}", "")
+		hostsResult = strings.ReplaceAll(hostsResult, `"`, "")
+
+		// Split up cleaned result
+		sshHosts := strings.Split(hostsResult, ",")
+
 		if len(sshHosts) > 2 {
 			time.Sleep(10 * time.Second)
 			fmt.Println("Sleeping for 10 seconds")
