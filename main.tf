@@ -103,6 +103,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
   name                = format("%s-vmss", var.prefix)
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
+  overprovision       = var.overprovision
   sku                 = var.vm_size
   instances           = var.instance_count
   admin_username      = var.admin_username
