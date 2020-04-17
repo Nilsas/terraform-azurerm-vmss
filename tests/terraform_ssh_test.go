@@ -89,6 +89,7 @@ func getInstanceConnectionInfo(t *testing.T, terraformOptions *terraform.Options
 	// If there are more than 2 instance in the list, wait
 	// Azure over-provisions Instances to maximize success rate
 	// retry for 5 minutes
+	var sshHosts []string
 	for i := 0; i < 30 ; i++ {
 		// Read public IP address and port from terraform output
 		hostsResult := terraform.Output(t, terraformOptions, outputName)
