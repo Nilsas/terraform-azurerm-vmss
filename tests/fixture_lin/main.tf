@@ -101,9 +101,9 @@ data "external" "list_vmss_ips" {
     "vmss",
     "list-instance-connection-info",
     "-g",
-    "${azurerm_resource_group.rg.name}}",
+    "${azurerm_resource_group.rg.name}",
     "--name",
-    "${local.prefix}-vmss}",
+    "${local.prefix}-vmss",
   ]
   depends_on = [module.vmss.vmss]
 }
