@@ -49,6 +49,7 @@ module "vmss" {
   virtual_network_name    = azurerm_virtual_network.vnet.name
   subnet_name             = azurerm_subnet.subnet.name
   prefix                  = local.prefix
+  overprovision           = false
   flavour                 = "lin"
   instance_count          = 2
   load_balance            = true

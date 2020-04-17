@@ -88,6 +88,11 @@ variable "flavour" {
   description = "This is needed to decide which flavour of VMSS to deploy Windows or Linux"
 }
 
+variable "overprovision" {
+  type        = bool
+  default     = true
+  description = "This means that multiple Virtual Machines will be provisioned and Azure will keep the instances which become available first - which improves provisioning success rates and improves deployment time. You're not billed for these over-provisioned VM's and they don't count towards the Subscription Quota"
+}
 
 variable "linux_distro_list" {
   type = map(object({
