@@ -17,8 +17,7 @@ data "http" "ip" {
 }
 
 resource "random_id" "id" {
-  length = 5
-  special = false
+  byte_length = 5
   prefix = "tf"
 }
 
