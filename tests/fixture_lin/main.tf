@@ -9,7 +9,7 @@ provider "azurerm" {
 }
 
 locals {
-  prefix = format("tf%s", lower(random_id.id.id))
+  prefix = random_id.id.b64_url
 }
 
 data "http" "ip" {
@@ -100,7 +100,7 @@ data "external" "list_vmss_ips" {
     "vmss",
     "list-instance-connection-info",
     "-g",
-    "${azurerm_resource_group.rg.name}",
+    azurerm_resource_group.rg.name,
     "--name",
     "${local.prefix}-vmss",
   ]
