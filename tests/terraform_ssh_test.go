@@ -104,6 +104,8 @@ func getInstanceConnectionInfo(t *testing.T, terraformOptions *terraform.Options
 
 		// Split up cleaned result
 		sshHosts := strings.Split(hostsResult, ",")
+		fmt.Println("Current ssh hosts:")
+		fmt.Println(sshHosts)
 
 		if len(sshHosts) > 2 {
 			time.Sleep(10 * time.Second)
