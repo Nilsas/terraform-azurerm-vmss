@@ -9,7 +9,7 @@ provider "azurerm" {
 }
 
 locals {
-  prefix = random_id.id.b64_url
+  prefix = lower(random_id.id.b64_url)
 }
 
 data "http" "ip" {
