@@ -102,8 +102,8 @@ func getInstanceConnectionInfo(t *testing.T, terraformOptions *terraform.Options
 	// Test case is carried with 2 instances
 	// If there are more than 2 instance in the list, wait
 	// Azure over-provisions Instances to maximize success rate
-	// retry for 5 times
-	for i := 0; i < 5 ; i++ {
+	// retry for 5 minutes
+	for i := 0; i < 30 ; i++ {
 		if len(sshHosts) > 2 {
 			time.Sleep(10 * time.Second)
 			fmt.Println("Sleeping for 10 seconds")
