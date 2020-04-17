@@ -9,7 +9,7 @@ provider "azurerm" {
 }
 
 locals {
-  prefix = random_string.str.id
+  prefix = lower(random_string.str.id)
 }
 
 data "http" "ip" {
