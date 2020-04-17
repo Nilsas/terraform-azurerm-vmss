@@ -103,7 +103,7 @@ data "external" "list_vmss_ips" {
     "-g",
     "${azurerm_resource_group.rg.name}}",
     "--name",
-    "${module.vmss.vmss.name}}",
+    "${local.prefix}-vmss}",
   ]
   depends_on = [module.vmss.vmss]
 }
