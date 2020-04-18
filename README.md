@@ -134,7 +134,7 @@ module "vmss_win" {
   resource_group_name     = azurerm_resource_group.rg.name
   virtual_network_name    = azurerm_virtual_network.vnet.name
   subnet_name             = azurerm_subnet.subnet.name
-  flavour                 = "win" # same as "linux"
+  flavour                 = "win" # same as "windows"
   win_distro              = "winserver" # valid values "winserver", "winsql", "wincore". Default is "wincore"
   instance_count          = 2
   admin_username          = "batman"

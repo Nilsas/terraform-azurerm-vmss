@@ -204,3 +204,18 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
   depends_on = [azurerm_lb_rule.lb_rule]
 }
+
+
+resource "azurerm_virtual_machine_scale_set_extension" "winrm" {
+  count                        = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
+  name                         = format("%s-ext-winrm", var.prefix)
+  virtual_machine_scale_set_id = azurerm_windows_virtual_machine_scale_set.win_vmss[0].id
+  publisher                    = "Microsoft.Azure.Extensions"
+  type                         = "CustomScript"
+  type_handler_version         = "2.0"
+
+  settings = jsonencode({
+    "fileUris"         = "https://raw.githubusercontent.com/Nilsas/terraform-azurerm-vmss/master/files/New-WinRMSetup.ps1"
+    "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File New-WinRMSetup.ps1"
+  })
+}
