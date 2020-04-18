@@ -40,6 +40,12 @@ variable "load_balance" {
   description = "This ether enables or disabels the load balancer building"
 }
 
+variable "enable_nat" {
+  type        = bool
+  default     = false
+  description = "If enabled load balancer nat pool will be created for SSH if flavor is linux and for winrm if flavour is windows"
+}
+
 variable "load_balanced_port_list" {
   type        = list(number)
   default     = []

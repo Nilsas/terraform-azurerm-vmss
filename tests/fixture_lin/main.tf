@@ -23,7 +23,7 @@ resource "random_id" "id" {
 resource "azurerm_resource_group" "rg" {
   location = "westeurope"
   name     = format("%s-rg", local.prefix)
-  tags     = {
+  tags = {
     EnvironmentType = "Development"
   }
 }
@@ -53,6 +53,7 @@ module "vmss" {
   flavour                 = "lin"
   instance_count          = 2
   load_balance            = true
+  enable_nat              = true
   load_balanced_port_list = [80]
   ssh_key_type            = "Generated"
   admin_username          = "batman"
@@ -94,7 +95,7 @@ output "ssh_priv_key" {
 }
 
 data "external" "list_vmss_ips" {
-  program    = [
+  program = [
     "pwsh",
     "-Command",
     "az",

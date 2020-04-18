@@ -67,14 +67,14 @@ resource "azurerm_lb_backend_address_pool" "pool" {
 }
 
 resource "azurerm_lb_nat_pool" "natpool" {
-  count                          = var.load_balance ? 1 : 0
+  count                          = var.load_balance && var.enable_nat ? 1 : 0
   resource_group_name            = data.azurerm_resource_group.rg.name
-  name                           = "ssh"
+  name                           = var.flavour == "linux" || var.flavour == "lin" ? "ssh" : "winrm"
   loadbalancer_id                = azurerm_lb.lb[count.index].id
   protocol                       = "Tcp"
   frontend_port_start            = 50000
   frontend_port_end              = 50119
-  backend_port                   = 22
+  backend_port                   = var.flavour == "linux" || var.flavour == "lin" ? 22 : 5986
   frontend_ip_configuration_name = azurerm_lb.lb[0].frontend_ip_configuration.0.name
 }
 
@@ -147,7 +147,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
       subnet_id = data.azurerm_subnet.subnet.id
 
       load_balancer_backend_address_pool_ids = var.load_balance ? [azurerm_lb_backend_address_pool.pool[0].id] : null
-      load_balancer_inbound_nat_rules_ids    = var.load_balance ? [azurerm_lb_nat_pool.natpool[0].id] : null
+      load_balancer_inbound_nat_rules_ids    = var.load_balance && var.enable_nat ? [azurerm_lb_nat_pool.natpool[0].id] : null
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
@@ -198,7 +198,7 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
       subnet_id = data.azurerm_subnet.subnet.id
 
       load_balancer_backend_address_pool_ids = var.load_balance ? [azurerm_lb_backend_address_pool.pool[0].id] : null
-      load_balancer_inbound_nat_rules_ids    = var.load_balance ? [azurerm_lb_nat_pool.natpool[0].id] : null
+      load_balancer_inbound_nat_rules_ids    = var.load_balance && var.enable_nat ? [azurerm_lb_nat_pool.natpool[0].id] : null
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
