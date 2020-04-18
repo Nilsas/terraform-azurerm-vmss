@@ -12,7 +12,7 @@ pool:
 
 variables:
   major: '0'
-  minor: '0'
+  minor: '1'
   revision: $[counter(variables['minor'], 1)]
 
 steps:
