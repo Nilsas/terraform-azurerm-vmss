@@ -13,7 +13,7 @@ data "http" "ip" {
 }
 
 resource "random_id" "id" {
-  byte_length = 5
+  byte_length = 1
 }
 
 resource "azurerm_resource_group" "rg" {
