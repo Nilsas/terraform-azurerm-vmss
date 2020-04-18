@@ -155,15 +155,16 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
 }
 
 resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
-  count               = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
-  name                = format("%s-vmss", var.prefix)
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
-  sku                 = var.vm_size
-  instances           = var.instance_count
-  admin_username      = var.admin_username
-  admin_password      = var.admin_password
-  tags                = var.tags
+  count                = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
+  name                 = format("%s-vmss", var.prefix)
+  computer_name_prefix = format("%s", var.prefix) # this cant be longer than 9 characters
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  location             = data.azurerm_resource_group.rg.location
+  sku                  = var.vm_size
+  instances            = var.instance_count
+  admin_username       = var.admin_username
+  admin_password       = var.admin_password
+  tags                 = var.tags
 
   source_image_reference {
     publisher = var.win_distro_list[lower(var.win_distro)]["publisher"]
