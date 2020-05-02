@@ -165,11 +165,16 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
   admin_password      = var.admin_password
   tags                = var.tags
 
-  source_image_reference {
-    publisher = var.custom_image != null ? var.custom_image["publisher"] : var.win_distro_list[lower(var.win_distro)]["publisher"]
-    offer     = var.custom_image != null ? var.custom_image["offer"] : var.win_distro_list[lower(var.win_distro)]["offer"]
-    sku       = var.custom_image != null ? var.custom_image["sku"] : var.win_distro_list[lower(var.win_distro)]["sku"]
-    version   = var.custom_image != null ? var.custom_image["version"] : var.win_distro_list[lower(var.win_distro)]["version"]
+  source_image_id = var.source_image_id
+
+  dynamic "source_image_reference" {
+    for_each = var.source_image_id != null ? [1] : []
+    content {
+      publisher = var.custom_image != null ? var.custom_image["publisher"] : var.win_distro_list[lower(var.win_distro)]["publisher"]
+      offer     = var.custom_image != null ? var.custom_image["offer"] : var.win_distro_list[lower(var.win_distro)]["offer"]
+      sku       = var.custom_image != null ? var.custom_image["sku"] : var.win_distro_list[lower(var.win_distro)]["sku"]
+      version   = var.custom_image != null ? var.custom_image["version"] : var.win_distro_list[lower(var.win_distro)]["version"]
+    }
   }
 
   os_disk {
