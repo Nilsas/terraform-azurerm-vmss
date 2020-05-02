@@ -114,11 +114,16 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
     public_key = local.ssh_key
   }
 
-  source_image_reference {
-    publisher = var.custom_image != null ? var.custom_image["publisher"] : var.linux_distro_list[lower(var.linux_distro)]["publisher"]
-    offer     = var.custom_image != null ? var.custom_image["offer"] : var.linux_distro_list[lower(var.linux_distro)]["offer"]
-    sku       = var.custom_image != null ? var.custom_image["sku"] : var.linux_distro_list[lower(var.linux_distro)]["sku"]
-    version   = var.custom_image != null ? var.custom_image["version"] : var.linux_distro_list[lower(var.linux_distro)]["version"]
+  source_image_id = var.source_image_id
+
+  dynamic "source_image_reference" {
+    for_each = var.source_image_id != null ? [1] : []
+    content {
+      publisher = var.custom_image != null ? var.custom_image["publisher"] : var.linux_distro_list[lower(var.linux_distro)]["publisher"]
+      offer     = var.custom_image != null ? var.custom_image["offer"] : var.linux_distro_list[lower(var.linux_distro)]["offer"]
+      sku       = var.custom_image != null ? var.custom_image["sku"] : var.linux_distro_list[lower(var.linux_distro)]["sku"]
+      version   = var.custom_image != null ? var.custom_image["version"] : var.linux_distro_list[lower(var.linux_distro)]["version"]
+    }
   }
 
   os_disk {
