@@ -96,6 +96,7 @@ resource "azurerm_lb_rule" "lb_rule" {
   frontend_port                  = tostring(var.load_balanced_port_list[count.index])
   backend_port                   = tostring(var.load_balanced_port_list[count.index])
   frontend_ip_configuration_name = azurerm_lb.lb[0].frontend_ip_configuration.0.name
+  backend_address_pool_id        = azurerm_lb_backend_address_pool.pool[0].id
 }
 
 resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
