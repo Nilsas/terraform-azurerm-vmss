@@ -115,10 +115,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
   }
 
   source_image_reference {
-    publisher = var.linux_distro_list[lower(var.linux_distro)]["publisher"]
-    offer     = var.linux_distro_list[lower(var.linux_distro)]["offer"]
-    sku       = var.linux_distro_list[lower(var.linux_distro)]["sku"]
-    version   = var.linux_distro_list[lower(var.linux_distro)]["version"]
+    publisher = var.custom_image != null ? var.custom_image["publisher"] : var.linux_distro_list[lower(var.linux_distro)]["publisher"]
+    offer     = var.custom_image != null ? var.custom_image["offer"] : var.linux_distro_list[lower(var.linux_distro)]["offer"]
+    sku       = var.custom_image != null ? var.custom_image["sku"] : var.linux_distro_list[lower(var.linux_distro)]["sku"]
+    version   = var.custom_image != null ? var.custom_image["version"] : var.linux_distro_list[lower(var.linux_distro)]["version"]
   }
 
   os_disk {
@@ -166,10 +166,10 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
   tags                = var.tags
 
   source_image_reference {
-    publisher = var.win_distro_list[lower(var.win_distro)]["publisher"]
-    offer     = var.win_distro_list[lower(var.win_distro)]["offer"]
-    sku       = var.win_distro_list[lower(var.win_distro)]["sku"]
-    version   = var.win_distro_list[lower(var.win_distro)]["version"]
+    publisher = var.custom_image != null ? var.custom_image["publisher"] : var.win_distro_list[lower(var.win_distro)]["publisher"]
+    offer     = var.custom_image != null ? var.custom_image["offer"] : var.win_distro_list[lower(var.win_distro)]["offer"]
+    sku       = var.custom_image != null ? var.custom_image["sku"] : var.win_distro_list[lower(var.win_distro)]["sku"]
+    version   = var.custom_image != null ? var.custom_image["version"] : var.win_distro_list[lower(var.win_distro)]["version"]
   }
 
   os_disk {

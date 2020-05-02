@@ -169,6 +169,17 @@ variable "win_distro" {
   description = "Variable to pick an OS flavour for Windows based VMSS possible values include: winserver, wincore, winsql"
 }
 
+variable "custom_image" {
+  type        = object({
+    publisher = string
+    offer     = string
+    sku       = string
+    version   = string
+  })
+  default     = null
+  description = "Advanced: provide your own image to this module if the default variants are not suitable"
+}
+
 variable "ssh_key_type" {
   type        = string
   default     = "FilePath"

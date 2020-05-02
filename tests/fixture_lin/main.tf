@@ -9,7 +9,7 @@ provider "azurerm" {
 }
 
 locals {
-  prefix = format("tf%s", lower(random_id.id.b64_url))
+  prefix = format("tf%s", replace(lower(random_id.id.b64_url), "_", ""))
 }
 
 data "http" "ip" {
