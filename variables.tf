@@ -180,6 +180,12 @@ variable "custom_image" {
   description = "Advanced: provide your own image to this module if the default variants are not suitable"
 }
 
+variable "source_image_id" {
+  type        = string
+  default     = null
+  description = "If this is provided all other image refs are ignored"
+}
+
 variable "ssh_key_type" {
   type        = string
   default     = "FilePath"
