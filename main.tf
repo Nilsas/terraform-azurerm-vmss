@@ -114,7 +114,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
     public_key = local.ssh_key
   }
 
-  source_image_id = var.source_image_id
+  source_image_id = var.source_image_id != null ? var.source_image_id : null
 
   dynamic "source_image_reference" {
     for_each = var.source_image_id != null ? [1] : []
