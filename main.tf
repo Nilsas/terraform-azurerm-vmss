@@ -72,8 +72,8 @@ resource "azurerm_lb_nat_pool" "natpool" {
   name                           = var.flavour == "linux" || var.flavour == "lin" ? "ssh" : "winrm"
   loadbalancer_id                = azurerm_lb.lb[count.index].id
   protocol                       = "Tcp"
-  frontend_port_start            = 50000
-  frontend_port_end              = 50119
+  frontend_port_start            = var.nat_frontend_ports[0]
+  frontend_port_end              = var.nat_frontend_ports[1]
   backend_port                   = var.flavour == "linux" || var.flavour == "lin" ? 22 : 5986
   frontend_ip_configuration_name = azurerm_lb.lb[0].frontend_ip_configuration.0.name
 }

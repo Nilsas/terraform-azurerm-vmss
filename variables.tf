@@ -46,6 +46,12 @@ variable "enable_nat" {
   description = "If enabled load balancer nat pool will be created for SSH if flavor is linux and for winrm if flavour is windows"
 }
 
+variable "nat_frontend_ports" {
+  type        = list(number)
+  default     = [50000, 50119]
+  description = "Optional override for default ports, first list item used as a start possition, second list item used as an end possition"
+}
+
 variable "load_balanced_port_list" {
   type        = list(number)
   default     = []
