@@ -7,25 +7,32 @@ module "vmss_win" {
   overprovision           = false
   flavour                 = "win"
   instance_count          = 2
-  admin_username          = var.admin_user
-  admin_password          = var.admin_pass
+  admin_username          = random_pet.username.id
+  admin_password          = random_password.password.result
   tags                    = azurerm_resource_group.rg_win.tags
   load_balance            = true
-  load_balanced_port_list = [80,443]
+  load_balanced_port_list = [80, 443]
   enable_nat              = true
+}
+
+resource "random_pet" "username" {}
+
+resource "random_password" "password" {
+  length  = 16
+  special = true
 }
 
 resource "null_resource" "delay" {
   // Might want to wait until Azure is done provisioning the instances
   provisioner "local-exec" {
-    command = "Start-Sleep 60"
+    command     = "Start-Sleep 60"
     interpreter = ["pwsh", "-Command"]
   }
   depends_on = [module.vmss_win.vmss]
 }
 
 data "external" "list_win_vmss_ips" {
-  program = [
+  program    = [
     "pwsh",
     "-Command",
     "az",
@@ -41,4 +48,13 @@ data "external" "list_win_vmss_ips" {
 
 output "winrm_conn_info" {
   value = data.external.list_win_vmss_ips.result
+}
+
+output "winrm_user" {
+  value = random_pet.username.id
+}
+
+output "winrm_pass" {
+  value     = random_password.password.result
+  sensitive = true
 }

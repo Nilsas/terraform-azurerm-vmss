@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = ">= 2.0.0"
+  version = ">= 2.8.0"
 
   features {}
 }
@@ -19,7 +19,7 @@ resource "random_id" "id" {
 resource "azurerm_resource_group" "rg_win" {
   location = "westeurope"
   name     = format("%s-rg", local.prefix)
-  tags = {
+  tags     = {
     EnvironmentType = "Development"
   }
 }
@@ -33,7 +33,7 @@ resource "azurerm_virtual_network" "vnet_win" {
 }
 
 resource "azurerm_subnet" "subnet_win" {
-  address_prefix       = "10.10.0.0/16"
+  address_prefixes     = ["10.10.0.0/16"]
   name                 = format("%s-subnet", local.prefix)
   resource_group_name  = azurerm_resource_group.rg_win.name
   virtual_network_name = azurerm_virtual_network.vnet_win.name
