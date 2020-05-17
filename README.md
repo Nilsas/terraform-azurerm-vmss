@@ -134,11 +134,11 @@ module "vmss_win" {
   resource_group_name     = azurerm_resource_group.rg.name
   virtual_network_name    = azurerm_virtual_network.vnet.name
   subnet_name             = azurerm_subnet.subnet.name
-  flavour                 = "win" # same as "linux"
+  flavour                 = "win" # same as "windows"
   win_distro              = "winserver" # valid values "winserver", "winsql", "wincore". Default is "wincore"
   instance_count          = 2
   admin_username          = "batman"
-  admin_password          = "S3cr3tu5M@x!mu$"
+  admin_password          = "S3cr3tu5M@x!mu$"  # Please change this
   tags                    = azurerm_resource_group.rg.tags
   load_balance            = true
   load_balanced_port_list = [80,443]
@@ -165,7 +165,7 @@ data "external" "list_vmss_ips" {
 }
 ```
 
-### Tip #2: To actually be able to connect to any instance there's need to be an NSG
+### Tip #2: To actually be able to connect to any instance you should have NSG in place
 alogside your configuration deploy something like this
 ```hcl
 data "http" "ip" {
@@ -197,3 +197,56 @@ resource "azurerm_network_security_rule" "agent" {
   destination_address_prefix  = "*"
 }
 ```
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| azurerm | >= 2.0.0 |
+| tls | ~> 2.1 |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:-----:|
+| additional\_data\_disk\_capacity\_list | A list of additional disk capacities in GB to add to each instance | `list(number)` | `[]` | no |
+| additional\_data\_disk\_storage\_account\_type | Storage account types for additional data disks. Possible values are: Standard\_LRS, StandardSSD\_LRS, Premium\_LRS | `string` | `"Standard_LRS"` | no |
+| admin\_password | Password for administration access within VMSS | `string` | `""` | no |
+| admin\_ssh\_key\_data | Public SSH key used for VMSS | `string` | `""` | no |
+| admin\_username | Username for administration access within VMSS | `string` | `"batman"` | no |
+| enable\_nat | If enabled load balancer nat pool will be created for SSH if flavor is linux and for winrm if flavour is windows | `bool` | `false` | no |
+| flavour | This is needed to decide which flavour of VMSS to deploy Windows or Linux | `string` | `"linux"` | no |
+| instance\_count | This decides how many VM instance should be spun up | `number` | `1` | no |
+| linux\_distro | Variable to pick an OS flavour for Linux based VMSS possible values include: centos8, ubuntu1804 | `string` | `"centos8"` | no |
+| linux\_distro\_list | n/a | <pre>map(object({<br>    publisher = string<br>    offer     = string<br>    sku       = string<br>    version   = string<br>  }))</pre> | <pre>{<br>  "centos8": {<br>    "offer": "CentOS",<br>    "publisher": "OpenLogic",<br>    "sku": "8.0",<br>    "version": "latest"<br>  },<br>  "ubuntu1804": {<br>    "offer": "UbuntuServer",<br>    "publisher": "Canonical",<br>    "sku": "18.04-LTS",<br>    "version": "latest"<br>  }<br>}</pre> | no |
+| load\_balance | This ether enables or disabels the load balancer building | `bool` | `false` | no |
+| load\_balanced\_port\_list | List of ports to be forwarded through load balancer to VMs | `list(number)` | `[]` | no |
+| load\_balancer\_probe\_port | Port used to health probe from load balancer. Defaults to 80 | `number` | `80` | no |
+| location | This variable will point all resource into one Azure location | `string` | `"westeurope"` | no |
+| os\_disk\_storage\_account\_type | Storage account types OS disks. Possible values are: Standard\_LRS, StandardSSD\_LRS, Premium\_LRS | `string` | `"StandardSSD_LRS"` | no |
+| overprovision | This means that multiple Virtual Machines will be provisioned and Azure will keep the instances which become available first - which improves provisioning success rates and improves deployment time. You're not billed for these over-provisioned VM's and they don't count towards the Subscription Quota | `bool` | `true` | no |
+| prefix | This variable is used to unify all resource naming within this module | `string` | `"my-prefix"` | no |
+| resource\_group\_name | This will tell us to which resource group we need to deploy the resources of this module | `string` | `"my-resource-group"` | no |
+| ssh\_key\_type | Method for passing the SSH key into Linux VMSS. Generated will create a new SSH key pair in terraform. Possible values include: Generated, Filepath. Defaults to FilePath | `string` | `"FilePath"` | no |
+| subnet\_name | This determines the name of subnet for our Scale Set. | `string` | `""` | no |
+| tags | This variable is used to refference same tags through all resources | `map(string)` | `{}` | no |
+| virtual\_network\_name | This will get the Vnet provided to the module to use for further deployment of resources | `string` | `"my-virtual-network"` | no |
+| vm\_size | What size your VMs will be | `string` | `"Standard_B2s"` | no |
+| win\_distro | Variable to pick an OS flavour for Windows based VMSS possible values include: winserver, wincore, winsql | `string` | `"wincore"` | no |
+| win\_distro\_list | n/a | <pre>map(object({<br>    publisher = string<br>    offer     = string<br>    sku       = string<br>    version   = string<br>  }))</pre> | <pre>{<br>  "wincore": {<br>    "offer": "WindowsServer",<br>    "publisher": "MicrosoftWindowsServer",<br>    "sku": "2016-Datacenter-Server-Core",<br>    "version": "latest"<br>  },<br>  "winserver": {<br>    "offer": "WindowsServer",<br>    "publisher": "MicrosoftWindowsServer",<br>    "sku": "2019-Datacenter",<br>    "version": "latest"<br>  },<br>  "winsql": {<br>    "offer": "SQL2017-WS2016",<br>    "publisher": "MicrosoftSQLServer",<br>    "sku": "Express",<br>    "version": "latest"<br>  }<br>}</pre> | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| lb | Outputs full Load Balancer resource |
+| lbbepool | Outputs full Load Balancer Backend Pool resource |
+| lbnatpool | Outputs full Load Balancer NAT Pool resource |
+| lbprobe | Outputs full Load Balancecr Probe resource |
+| lbrule | Outputs full Load Balancer Rule resource |
+| pip | Outputs full Public IP resource |
+| ssh\_key\_private | Outputs SSH Private Key if you chose Generated SSH Keys |
+| ssh\_key\_public | Outputs SSH Public Key if you chose Generated SSH Keys |
+| vmss | Outputs full Virtual Machine Scale Set resource depending on flavour chose ether Windows or Linux |
+
+

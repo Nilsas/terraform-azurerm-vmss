@@ -1,10 +1,3 @@
-terraform {
-  required_providers {
-    azurerm = ">= 2.0.0"
-    tls     = "~> 2.1"
-  }
-}
-
 provider "azurerm" {
   features {}
 }
@@ -161,15 +154,16 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
 }
 
 resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
-  count               = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
-  name                = format("%s-vmss", var.prefix)
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
-  sku                 = var.vm_size
-  instances           = var.instance_count
-  admin_username      = var.admin_username
-  admin_password      = var.admin_password
-  tags                = var.tags
+  count                = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
+  name                 = format("%s-vmss", var.prefix)
+  computer_name_prefix = format("%s", var.prefix) # this cant be longer than 9 characters
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  location             = data.azurerm_resource_group.rg.location
+  sku                  = var.vm_size
+  instances            = var.instance_count
+  admin_username       = var.admin_username
+  admin_password       = var.admin_password
+  tags                 = var.tags
 
   source_image_id = var.source_image_id
 
@@ -214,4 +208,19 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
   depends_on = [azurerm_lb_rule.lb_rule]
+}
+
+
+resource "azurerm_virtual_machine_scale_set_extension" "winrm" {
+  count                        = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
+  name                         = format("%s-ext-winrm", var.prefix)
+  virtual_machine_scale_set_id = azurerm_windows_virtual_machine_scale_set.win_vmss[0].id
+  publisher                    = "Microsoft.Azure.Extensions"
+  type                         = "CustomScript"
+  type_handler_version         = "2.0"
+
+  settings = jsonencode({
+    "fileUris"         = "https://raw.githubusercontent.com/Nilsas/terraform-azurerm-vmss/master/files/New-WinRMSetup.ps1"
+    "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File New-WinRMSetup.ps1"
+  })
 }
