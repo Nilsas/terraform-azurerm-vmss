@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -38,12 +39,15 @@ func testWinRMToPublicHost(t *testing.T, terraformOptions *terraform.Options)  {
 	user := terraform.Output(t, terraformOptions, "winrm_user")
 	pass := terraform.Output(t, terraformOptions, "winrm_pass")
 
-	hosts := getInstanceConnInfo(t, terraformOptions)
+	hosts, err := getInstanceConnInfo(t, terraformOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	wg := &sync.WaitGroup{}
 	for _, instance := range hosts {
 		wg.Add(1)
-		go func(instance string) {
+		go func(instance string) string{
 			instanceParts := strings.Split(instance, "=")
 			address := strings.Split(instanceParts[1], ":")
 			port, _ := strconv.Atoi(address[1])
@@ -60,7 +64,7 @@ func testWinRMToPublicHost(t *testing.T, terraformOptions *terraform.Options)  {
 			command := fmt.Sprintf("echo '%s'", expectedText)
 
 			// Verify that we can WinRM to the Virtual Machine and run commands
-			retry.DoWithRetry(t, description, maxRetries, timeBetweenRetries, func() (string, error) {
+			f := retry.DoWithRetry(t, description, maxRetries, timeBetweenRetries, func() (string, error) {
 				// Run the command and get the output
 				actualText, _, _ ,err := client.RunWithString(command, "")
 				if err != nil {
@@ -71,22 +75,28 @@ func testWinRMToPublicHost(t *testing.T, terraformOptions *terraform.Options)  {
 				if strings.TrimSpace(actualText) != expectedText {
 					return "", fmt.Errorf("Expected WinRM command to return '%s' but got '%s'", expectedText, actualText)
 				}
-				fmt.Println(actualText)
 
-				return "", nil
+
+				return actualText, nil
 			})
+
+			return f
 
 		}(instance)
 	}
 	wg.Wait()
 }
 
-func getInstanceConnInfo(t *testing.T, terraformOptions *terraform.Options) []string  {
+func getInstanceConnInfo(t *testing.T, terraformOptions *terraform.Options) ([]string, error)  {
 	var winrmHosts []string
 	connInfo := "winrm_conn_info"
 	for i := 0; i < 5 ; i++ {
+		// if we are retrying, refresh the outputs
+		if i > 0 {
+			terraform.RunTerraformCommand(t, terraformOptions, "refresh", "-no-color")
+			terraform.Apply(t, terraformOptions)
+		}
 		// set terraform options to target just the resource I need
-
 		hostsResult := terraform.Output(t, terraformOptions, connInfo)
 
 		// Clean up hosts result
@@ -105,13 +115,13 @@ func getInstanceConnInfo(t *testing.T, terraformOptions *terraform.Options) []st
 		if len(winrmHosts) > 2 {
 			fmt.Println("Sleeping for 30 seconds")
 			time.Sleep(30 * time.Second)
-
 		} else if len(winrmHosts) == 2 {
-			break
+			return winrmHosts, nil
 		} else {
-			fmt.Println("WinRM Hosts count did not match expectations")
+			err := "WinRM Hosts count did not match expectations"
+			log.Fatal(err)
 		}
 	}
 
-	return winrmHosts
+	return winrmHosts, nil
 }
