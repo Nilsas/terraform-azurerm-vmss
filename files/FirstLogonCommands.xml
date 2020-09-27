@@ -1,0 +1,32 @@
+<FirstLogonCommands>
+    <SynchronousCommand>
+        <CommandLine>powershell.exe -ExecutionPolicy Unrestricted -Command "Set-PSReadlineOption -HistorySaveStyle SaveNothing"</CommandLine>
+        <Description>Disable PowerShell history</Description>
+        <Order>11</Order>
+    </SynchronousCommand>
+    <SynchronousCommand>
+        <CommandLine>cmd /c "mkdir C:\terraform"</CommandLine>
+        <Description>Create the Terraform working directory</Description>
+        <Order>12</Order>
+    </SynchronousCommand>
+    <SynchronousCommand>
+        <CommandLine>cmd /c "copy C:\AzureData\CustomData.bin C:\terraform\setup_winrm.ps1"</CommandLine>
+        <Description>Move the CustomData file to the working directory</Description>
+        <Order>13</Order>
+    </SynchronousCommand>
+    <SynchronousCommand>
+        <CommandLine>powershell.exe -sta -ExecutionPolicy Unrestricted -file C:\terraform\setup_winrm.ps1</CommandLine>
+        <Description>Execute the WinRM enabling script</Description>
+        <Order>14</Order>
+    </SynchronousCommand>
+    <SynchronousCommand>
+        <CommandLine>cmd /c "rd /s /q C:\terraform"</CommandLine>
+        <Description>Delete the terraform folder</Description>
+        <Order>15</Order>
+    </SynchronousCommand>
+    <SynchronousCommand>
+        <CommandLine>cmd /c "rd /s /q C:\AzureData"</CommandLine>
+        <Description>Delete the AzureData folder</Description>
+        <Order>16</Order>
+    </SynchronousCommand>
+</FirstLogonCommands>
