@@ -6,6 +6,7 @@ module "vmss_win" {
   subnet_name             = azurerm_subnet.subnet_win.name
   overprovision           = false
   flavour                 = "win"
+  win_distro              = "winserver"
   instance_count          = 2
   admin_username          = random_pet.username.id
   admin_password          = random_password.password.result

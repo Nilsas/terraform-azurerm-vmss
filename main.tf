@@ -71,6 +71,18 @@ resource "azurerm_lb_nat_pool" "natpool" {
   frontend_ip_configuration_name = azurerm_lb.lb[0].frontend_ip_configuration.0.name
 }
 
+resource "azurerm_lb_nat_pool" "rdpnatpool" {
+  count                          = var.enable_nat && var.flavour == "win" ? 1 : 0
+  resource_group_name            = data.azurerm_resource_group.rg.name
+  name                           = "RDP"
+  loadbalancer_id                = azurerm_lb.lb[count.index].id
+  protocol                       = "Tcp"
+  frontend_port_start            = 40000
+  frontend_port_end              = 40120
+  backend_port                   = 3389
+  frontend_ip_configuration_name = azurerm_lb.lb[0].frontend_ip_configuration.0.name
+}
+
 resource "azurerm_lb_probe" "probe" {
   count               = var.load_balance ? 1 : 0
   name                = format("%s-lb-probe-port-%d", var.prefix, var.load_balancer_probe_port)
@@ -146,7 +158,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
       subnet_id = data.azurerm_subnet.subnet.id
 
       load_balancer_backend_address_pool_ids = var.load_balance ? [azurerm_lb_backend_address_pool.pool[0].id] : null
-      load_balancer_inbound_nat_rules_ids    = var.load_balance && var.enable_nat ? [azurerm_lb_nat_pool.natpool[0].id] : null
+      load_balancer_inbound_nat_rules_ids    = var.load_balance && var.enable_nat ? [
+        azurerm_lb_nat_pool.natpool[0].id] : null
     }
   }
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
@@ -156,7 +169,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "lin_vmss" {
 resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
   count                = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
   name                 = format("%s-vmss", var.prefix)
-  computer_name_prefix = format("%s", var.prefix) # this cant be longer than 9 characters
+  # this cant be longer than 9 characters
+  computer_name_prefix = format("%s", var.prefix)
   resource_group_name  = data.azurerm_resource_group.rg.name
   location             = data.azurerm_resource_group.rg.location
   sku                  = var.vm_size
@@ -203,24 +217,20 @@ resource "azurerm_windows_virtual_machine_scale_set" "win_vmss" {
       subnet_id = data.azurerm_subnet.subnet.id
 
       load_balancer_backend_address_pool_ids = var.load_balance ? [azurerm_lb_backend_address_pool.pool[0].id] : null
-      load_balancer_inbound_nat_rules_ids    = var.load_balance && var.enable_nat ? [azurerm_lb_nat_pool.natpool[0].id] : null
+      load_balancer_inbound_nat_rules_ids    = var.load_balance && var.enable_nat ? [azurerm_lb_nat_pool.natpool[0].id, azurerm_lb_nat_pool.rdpnatpool[0].id] : null
     }
   }
+
+  additional_unattend_content {
+    setting = "AutoLogon"
+    content = "<AutoLogon><Password><Value>${var.admin_password}</Value></Password><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>${var.admin_username}</Username></AutoLogon>"
+  }
+
+  additional_unattend_content {
+    setting = "FirstLogonCommands"
+    content = file("${path.module}/files/FirstLogonCommands.xml")
+  }
+
   # As noted in Terraform documentation https://www.terraform.io/docs/providers/azurerm/r/linux_virtual_machine_scale_set.html#load_balancer_backend_address_pool_ids
   depends_on = [azurerm_lb_rule.lb_rule]
-}
-
-
-resource "azurerm_virtual_machine_scale_set_extension" "winrm" {
-  count                        = var.flavour == "windows" || var.flavour == "win" ? 1 : 0
-  name                         = format("%s-ext-winrm", var.prefix)
-  virtual_machine_scale_set_id = azurerm_windows_virtual_machine_scale_set.win_vmss[0].id
-  publisher                    = "Microsoft.Azure.Extensions"
-  type                         = "CustomScript"
-  type_handler_version         = "2.0"
-
-  settings = jsonencode({
-    "fileUris"         = "https://raw.githubusercontent.com/Nilsas/terraform-azurerm-vmss/master/files/New-WinRMSetup.ps1"
-    "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File New-WinRMSetup.ps1"
-  })
 }
