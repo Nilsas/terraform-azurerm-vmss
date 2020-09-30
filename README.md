@@ -116,6 +116,8 @@ module "vmss_lin" {
 
 ## Usage (Windows with load balancer)
 
+For some weird reason winrm enabling might now always work, I'm investigating pull requests welcome
+
 ```hcl
 resource "azurerm_resource_group" "rg" {
   ...
